@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+coffee --compile test/models/
+coffee --compile models/
