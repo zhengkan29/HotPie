@@ -7,7 +7,20 @@
   Pie = (function() {
 
     Pie.key = function() {
-      return "Pie:" + Process.env.NODE_ENV;
+      return "Pie:" + process.env.NODE_ENV;
+    };
+
+    Pie.all = function(callback) {
+      return redis.hgetall(Pie.key(), function(err, objects) {
+        var id, json, pie, pies;
+        pies = [];
+        for (id in objects) {
+          json = objects[id];
+          pie = new Pie(JSON.parse(json));
+          pies.push(pie);
+        }
+        return callback(null, pies);
+      });
     };
 
     function Pie(attributes) {
