@@ -10,6 +10,8 @@
       return "Pie:" + process.env.NODE_ENV;
     };
 
+    Pie.states = ['inactive', 'making', 'ready'];
+
     Pie.all = function(callback) {
       return redis.hgetall(Pie.key(), function(err, objects) {
         var id, json, pie, pies;
@@ -20,6 +22,36 @@
           pies.push(pie);
         }
         return callback(null, pies);
+      });
+    };
+
+    Pie.active = function(callback) {
+      return Pie.all(function(err, pies) {
+        var activePies, pie;
+        activePies = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = pies.length; _i < _len; _i++) {
+            pie = pies[_i];
+            if (pie.state !== 'inactive') {
+              _results.push(pie);
+            }
+          }
+          return _results;
+        })();
+        return callback(null, activePies);
+      });
+    };
+
+    Pie.getById = function(id, callback) {
+      return redis.hget(Pie.key(), id, function(err, json) {
+        var pie;
+        if (json === null) {
+          callback(new Error("Pie '" + id + "' could not be found."));
+          return;
+        }
+        pie = new Pie(JSON.parse(json));
+        return callback(null, pie);
       });
     };
 
@@ -38,13 +70,34 @@
       if (!this.state) {
         this.state = 'inactive';
       }
-      return this.generateId();
+      this.generateId();
+      return this.defineStateMachine();
     };
 
     Pie.prototype.generateId = function() {
       if (!this.id && this.name) {
         return this.id = this.name.replace(/\s/g, '-');
       }
+    };
+
+    Pie.prototype.defineStateMachine = function() {
+      var state, _i, _len, _ref, _results,
+        _this = this;
+      _ref = Pie.states;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        state = _ref[_i];
+        _results.push((function(state) {
+          return _this[state] = function(callback) {
+            this.state = state;
+            this.stateUpdatedAt = (new Date).getTime();
+            return this.save(function() {
+              return callback();
+            });
+          };
+        })(state));
+      }
+      return _results;
     };
 
     Pie.prototype.save = function(callback) {

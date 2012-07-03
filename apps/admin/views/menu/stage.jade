@@ -1,6 +1,6 @@
 ul#listing
   each pie in pies
-    li(class=pie.type)
+    li(class=pie.type, data-id=pie.id)
       div.status
         div(class=cssClassForState('inactive', pie.state))
           p gone

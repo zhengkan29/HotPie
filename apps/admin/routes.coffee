@@ -31,6 +31,17 @@ routes = (app) ->
           req.flash 'info', "Pie #{pie.name} was saved."
           res.redirect '/admin/pies'
           
+      app.put '/:id', (req, res) ->
+        Pie.getById req.params.id, (err, pie) ->
+          if req.body.state in Pie.states
+            pie[req.body.state] ->
+              if socketIO = app.settings.socketIO
+                socketIO.sockets.emit "pie:changed", pie
+              res.send "OK"
+          # else
+          #   res.render 'error',
+          #     status: 403
+
     app.namespace '/menu', ->
     
       app.get '/stage', (req, res) ->

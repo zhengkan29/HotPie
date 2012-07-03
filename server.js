@@ -13,6 +13,7 @@ require('express-namespace');
 var app = module.exports = express.createServer();
 
 // Configuration
+//require('./apps/socket-io')(app);
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
@@ -25,6 +26,7 @@ app.configure(function(){
     secret: "asntoedlkjhgfgjgfgbnmgfghjkjgghjkkjhgghjkjgfghjk",
     store: new RedisStore
   }));
+  app.use(require('connect-assets')());
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
 });
@@ -43,11 +45,12 @@ app.configure('production', function(){
 
 //Helpers
 require('./apps/helpers')(app);
-require('./apps/admin/routes')(app)
 
 // Routes
 
-require('./apps/authentication/routes')(app)
+require('./apps/authentication/routes')(app);
+require('./apps/admin/routes')(app);
+require('./apps/sidewalk/routes')(app);
 
 app.listen(app.settings.port, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

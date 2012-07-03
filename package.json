@@ -8,7 +8,9 @@
     "redis": "~0.7.2",
     "connect-redis": "~1.4.0",
     "hiredis": "~0.1.14",
-    "express-namespace": "~0.1.1"
+    "express-namespace": "~0.1.1",
+    "connect-assets": "~2.2.1",
+    "socket.io": "~0.9.6"
   },
   "devDependencies": {
     "request": "~2.9.203",

@@ -13,4 +13,8 @@ html
       if flash[flashType]
         p.flash(class=flashType)
           = flash[flashType]
+
     != body
+    
+    script(src='/socket.io/socket.io.js')
+    != js('application')
